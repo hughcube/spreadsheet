@@ -131,8 +131,12 @@ class SheetParser
      * @param bool $required 是否为必需列, 默认 true
      * @return $this
      */
-    public function addHeaderPattern(string $name, ?callable $is, ?callable $format = null, bool $required = true): static
-    {
+    public function addHeaderPattern(
+        string $name,
+        ?callable $is,
+        ?callable $format = null,
+        bool $required = true
+    ): static {
         $this->headerPatterns[$name] = ['is' => $is, 'format' => $format, 'required' => $required];
 
         /** 清除缓存, 确保新增的 pattern 生效 */
