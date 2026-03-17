@@ -56,6 +56,7 @@ class SheetExporter
     public static function create(string|DriverInterface|null $driver = null, ?string $filename = null): static
     {
         if ($driver instanceof DriverInterface) {
+            /** @phpstan-ignore new.static */
             $instance = new static();
             $instance->driver = $driver;
             $instance->pendingFilename = $filename;
@@ -66,6 +67,7 @@ class SheetExporter
             $driver = static::detectBestDriver();
         }
 
+        /** @phpstan-ignore new.static */
         $instance = new static();
         $instance->driver = match ($driver) {
             'csv' => new CsvDriver(),

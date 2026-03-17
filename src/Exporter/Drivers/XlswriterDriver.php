@@ -132,7 +132,7 @@ class XlswriterDriver implements DriverInterface
             return;
         }
 
-        /** 确保游标在正确位置 */
+        /** 确保游标在正确位置 @phpstan-ignore method.notFound */
         $this->excel->setCurrentLine($this->bufferStartRow);
 
         /** data() 从游标位置批量写入, 一次调用写 N 行 */

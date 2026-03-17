@@ -19,6 +19,7 @@ class Style
 
     public static function make(): static
     {
+        /** @phpstan-ignore new.static */
         return new static();
     }
 
