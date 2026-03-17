@@ -1,6 +1,6 @@
 {
     "name": "hughcube/spreadsheet",
-    "description": "",
+    "description": "A PHP library for parsing Excel spreadsheets with automatic header detection and data validation",
     "license": "MIT",
     "authors": [
         {
@@ -9,13 +9,13 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
-        "phpoffice/phpspreadsheet": "^1.0 || ^2.0 || ^3.0 || ^4.0 || ^5.0"
+        "php": "^8.1",
+        "phpoffice/phpspreadsheet": "^1.23 || ^2.0 || ^3.0 || ^4.0 || ^5.0"
     },
     "require-dev": {
+        "phpunit/phpunit": "*",
         "squizlabs/php_codesniffer": "*",
-        "phpstan/phpstan": "*",
-        "orchestra/testbench": "*"
+        "phpstan/phpstan": "*"
     },
     "autoload": {
         "psr-4": {
@@ -26,8 +26,6 @@
         "psr-4": {
             "HughCube\\Spreadsheet\\Tests\\": "tests"
         }
-    },
-    "extra": {
     },
     "scripts": {
         "test": "phpunit",

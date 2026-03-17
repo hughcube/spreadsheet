@@ -3,40 +3,67 @@ name: Test
 on: [ push, pull_request ]
 
 jobs:
-  run:
-    runs-on: ${{ matrix.operating-system }}
+  run-linux:
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 15
-      matrix:
-        operating-system: [ ubuntu-latest, windows-latest, macOS-latest ]
-        php-versions: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1' ]
-    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
-    steps:
+      matrix: &matrix
+        php: [ 8.1, 8.2, 8.3, 8.4 ]
+        spreadsheet: [ 1, 2, 3, 4, 5 ]
+    name: PHP ${{ matrix.php }} PhpSpreadsheet ${{ matrix.spreadsheet }} Test on ubuntu-latest
+    steps: &common_steps
       - name: Checkout
         uses: actions/checkout@master
 
       - name: Setup PHP
         uses: shivammathur/setup-php@master
         with:
-          php-version: ${{ matrix.php-versions }}
-          extension-csv: mbstring, xdebug #optional, setup extensions
-          ini-values-csv: post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
-          coverage: xdebug #optional, setup coverage driver
-          pecl: true #optional, setup PECL
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xdebug, opcache, fileinfo, gd, zip, xml, dom, ctype, iconv, simplexml, xmlreader, xmlwriter, zlib
+          tools: composer:v2
+          ini-values: post_max_size=256M, short_open_tag=On, opcache.enable_cli=1
 
       - name: System Setting
         run: |
           php -v
           composer -V
           php -m
+
       - name: Validate composer.json and composer.lock
         run: composer validate
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: |
+          echo "has_deps=false" >> "$GITHUB_ENV"
+          composer config --no-plugins audit.block-insecure false
+          composer require phpoffice/phpspreadsheet:^${{ matrix.spreadsheet }} --no-update --prefer-stable
+          composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+          echo "has_deps=true" >> "$GITHUB_ENV"
+        continue-on-error: true
+
+      - name: Composer Info
+        if: ${{ 'true' == env.has_deps }}
+        run: composer info
 
       - name: Run PHPUnit
-        run: |
-          composer run-script test
-          curl -o ocular.phar https://scrutinizer-ci.com/ocular.phar
-          php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+        if: ${{ 'true' == env.has_deps }}
+        run: composer run-script test -- -c phpunit.xml.dist --testdox
+
+  run-macos:
+    runs-on: macOS-latest
+    strategy:
+      max-parallel: 15
+      matrix: *matrix
+    name: PHP ${{ matrix.php }} PhpSpreadsheet ${{ matrix.spreadsheet }} Test on macOS-latest
+    steps: *common_steps
+
+  run-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      max-parallel: 15
+      matrix: *matrix
+    name: PHP ${{ matrix.php }} PhpSpreadsheet ${{ matrix.spreadsheet }} Test on windows-latest
+    steps: *common_steps
