@@ -158,7 +158,8 @@ class OpenSpoutDriver implements DriverInterface
             $spoutStyle = $spoutStyle->withCellAlignment($this->toAlignment($style->getHorizontalAlign()));
         }
         if (null !== $style->getVerticalAlign()) {
-            $spoutStyle = $spoutStyle->withCellVerticalAlignment($this->toVerticalAlignment($style->getVerticalAlign()));
+            $vAlign = $this->toVerticalAlignment($style->getVerticalAlign());
+            $spoutStyle = $spoutStyle->withCellVerticalAlignment($vAlign);
         }
         if (null !== $style->getNumberFormat()) {
             $spoutStyle = $spoutStyle->withFormat($style->getNumberFormat());
