@@ -9,4 +9,3 @@ composer.lock
 .phpunit.result.cache
 /tests/resources/test.xlsx.error.*.xlsx
 .phpunit.cache/
-phpunit.xml.dist
