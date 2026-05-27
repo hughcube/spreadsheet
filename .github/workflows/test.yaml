@@ -8,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 15
       matrix: &matrix
-        php: [ 8.1, 8.2, 8.3, 8.4 ]
+        php: [ 8.1, 8.2, 8.3, 8.4, 8.5 ]
         spreadsheet: [ 1, 2, 3, 4, 5 ]
     name: PHP ${{ matrix.php }} PhpSpreadsheet ${{ matrix.spreadsheet }} Test on ubuntu-latest
     steps: &common_steps
