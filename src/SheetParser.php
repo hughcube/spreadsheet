@@ -12,7 +12,9 @@ use Generator;
 use HughCube\Spreadsheet\Models\Headers;
 use PhpOffice\PhpSpreadsheet\Cell\CellAddress;
 use PhpOffice\PhpSpreadsheet\Cell\CellRange;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -209,17 +211,37 @@ class SheetParser
             if ($startRowIndex <= $highestRow) {
                 for ($rowIndex = $startRowIndex; $rowIndex <= $endRowIndex; $rowIndex++) {
                     /** 通过 rangeToArray 批量读取, 避免逐个创建 Cell 对象导致内存膨胀 */
+                    /** formatData=false: 数字/公式拿原始值, 避免千分位等数字格式被 toFormattedString 转成 "1,000" 这类字符串, 调用方再 floatval 会被截断 */
                     $range = sprintf('A%d:%s%d', $rowIndex, $endColumn, $rowIndex);
                     try {
-                        $rowData = $this->getSheet()->rangeToArray($range, null, true, true, true);
+                        $rowData = $this->getSheet()->rangeToArray($range, null, true, false, true);
                         $cells = $rowData[$rowIndex] ?? [];
+                        /** 日期单元格(原始值是 Excel serial number)单独走 getFormattedValue, 否则会得到无意义的数字 */
+                        foreach ($this->getSheet()->getRowIterator($rowIndex, $rowIndex) as $row) {
+                            foreach ($row->getCellIterator('A', $endColumn) as $index => $cell) {
+                                if (Date::isDateTime($cell)) {
+                                    try {
+                                        $cells[$index] = $cell->getFormattedValue();
+                                    } catch (Throwable $e) {
+                                        /** 日期格式化失败, 保留 rangeToArray 拿到的原始 serial number */
+                                    }
+                                }
+                            }
+                        }
                     } catch (Throwable $exception) {
-                        /** 批量读取失败(含公式计算异常), 降级为逐单元格处理, 仅失败的 cell 取原始值 */
+                        /** 批量读取失败(含公式计算异常), 降级为逐单元格处理 */
                         $cells = [];
                         foreach ($this->getSheet()->getRowIterator($rowIndex, $rowIndex) as $row) {
                             foreach ($row->getCellIterator('A', $endColumn) as $index => $cell) {
                                 try {
-                                    $cells[$index] = $cell->getFormattedValue();
+                                    /** 数字/公式且非日期 → 原始值; 日期/字符串/其他 → 格式化字符串 */
+                                    $dataType = $cell->getDataType();
+                                    $isNumericLike = $dataType === DataType::TYPE_NUMERIC || $dataType === DataType::TYPE_FORMULA;
+                                    if ($isNumericLike && !Date::isDateTime($cell)) {
+                                        $cells[$index] = $cell->getCalculatedValue();
+                                    } else {
+                                        $cells[$index] = $cell->getFormattedValue();
+                                    }
                                 } catch (Throwable $e) {
                                     $cells[$index] = $cell->getValue();
                                 }
