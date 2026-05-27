@@ -240,7 +240,8 @@ class SheetParser
                                 try {
                                     /** 数字/公式且非日期 → 原始值; 日期/字符串/其他 → 格式化字符串 */
                                     $dataType = $cell->getDataType();
-                                    $isNumericLike = $dataType === DataType::TYPE_NUMERIC || $dataType === DataType::TYPE_FORMULA;
+                                    $isNumericLike = $dataType === DataType::TYPE_NUMERIC
+                                        || $dataType === DataType::TYPE_FORMULA;
                                     if ($isNumericLike && !Date::isDateTime($cell)) {
                                         $cells[$index] = $cell->getCalculatedValue();
                                     } else {
