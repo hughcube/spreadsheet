@@ -11,7 +11,9 @@ namespace HughCube\Spreadsheet;
 use HughCube\Spreadsheet\Models\Headers;
 use PhpOffice\PhpSpreadsheet\Cell\CellAddress;
 use PhpOffice\PhpSpreadsheet\Cell\CellRange;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
@@ -120,7 +122,14 @@ class SheetParser
             $cells = [];
             foreach ($row->getCellIterator('A', $endColumn) as $index => $cell) {
                 try {
-                    $cells[$index] = $cell->getFormattedValue();
+                    /** 数字/公式且非日期 → 原始/计算值, 避免千分位等数字格式被 getFormattedValue 转成 "1,000" 这类字符串, 调用方 floatval 时会截断成 1 */
+                    $dataType = $cell->getDataType();
+                    $isNumericLike = $dataType === DataType::TYPE_NUMERIC || $dataType === DataType::TYPE_FORMULA;
+                    if ($isNumericLike && !Date::isDateTime($cell)) {
+                        $cells[$index] = $cell->getCalculatedValue();
+                    } else {
+                        $cells[$index] = $cell->getFormattedValue();
+                    }
                 } catch (Throwable $exception) {
                     $cells[$index] = $cell->getValue();
                 }
