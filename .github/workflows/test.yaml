@@ -19,10 +19,9 @@ jobs:
         uses: shivammathur/setup-php@master
         with:
           php-version: ${{ matrix.php-versions }}
-          extension-csv: mbstring, xdebug #optional, setup extensions
-          ini-values-csv: post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
-          coverage: xdebug #optional, setup coverage driver
-          pecl: true #optional, setup PECL
+          extensions: mbstring, fileinfo, gd, zip, xml, dom, ctype, iconv, simplexml, xmlreader, xmlwriter, zlib
+          tools: composer:v2
+          ini-values: post_max_size=256M, short_open_tag=On
 
       - name: System Setting
         run: |
