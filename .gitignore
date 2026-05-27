@@ -10,3 +10,4 @@ composer.lock
 /tests/resources/test.xlsx.error.*.xlsx
 .phpunit.cache/
 phpunit.xml.dist
+/docs/
