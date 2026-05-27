@@ -133,8 +133,12 @@ class SheetParser
      * @param bool $required 是否为必需列, 默认 true
      * @return $this
      */
-    public function addHeaderPattern(string $name, ?callable $is, ?callable $format = null, bool $required = true): static
-    {
+    public function addHeaderPattern(
+        string $name,
+        ?callable $is,
+        ?callable $format = null,
+        bool $required = true
+    ): static {
         $this->headerPatterns[$name] = ['is' => $is, 'format' => $format, 'required' => $required];
 
         /** 清除缓存, 确保新增的 pattern 生效 */
@@ -194,7 +198,7 @@ class SheetParser
      * @param int|null $maxRowCount 最大读取行数, null 表示读取全部数据行
      * @return Generator<int, array<string, mixed>> 键为行号, 值为字段数组 ['key' => formatted_value]
      */
-    public function getDataIterator(int $maxRowCount = null): Generator
+    public function getDataIterator(?int $maxRowCount = null): Generator
     {
         $headers = $this->getHeaders();
         if (null !== $headers) {
@@ -236,7 +240,8 @@ class SheetParser
                                 try {
                                     /** 数字/公式且非日期 → 原始值; 日期/字符串/其他 → 格式化字符串 */
                                     $dataType = $cell->getDataType();
-                                    $isNumericLike = $dataType === DataType::TYPE_NUMERIC || $dataType === DataType::TYPE_FORMULA;
+                                    $isNumericLike = $dataType === DataType::TYPE_NUMERIC
+                                        || $dataType === DataType::TYPE_FORMULA;
                                     if ($isNumericLike && !Date::isDateTime($cell)) {
                                         $cells[$index] = $cell->getCalculatedValue();
                                     } else {
@@ -351,5 +356,4 @@ class SheetParser
             }
         }
     }
-
 }

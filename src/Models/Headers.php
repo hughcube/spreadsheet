@@ -103,7 +103,7 @@ class Headers
      * 每个 pattern 在同一行中只会匹配一次(第一个匹配的单元格), 避免重复列.
      *
      * @param SheetParser $parse       解析器实例
-     * @param array       $patterns    表头匹配规则, 格式: ['key' => ['is' => callable, 'format' => callable|null, 'required' => bool]]
+     * @param array $patterns 表头匹配规则
      * @param int         $maxScanRows 最大扫描行数, 0 表示不限制, 默认 50
      * @return array{0: static|null, 1: static|null} [完全匹配的表头|null, 最近匹配的表头|null]
      */
